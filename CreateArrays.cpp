@@ -14,7 +14,7 @@ int main()
     cin >> m;
 
     system("clear");
-    vector<vector<int>> arr(n, vector<int>(m));
+    vector<vector<int>> arr(n, vector<int>(m)); //int arr[n][m]
 
     for (int i = 0; i < n; i++)
     {
