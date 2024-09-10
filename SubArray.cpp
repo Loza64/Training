@@ -1,80 +1,79 @@
-#include <iostream>
-#include <vector>
-#include <algorithm>
-#include <tuple>
-#include <climits>
+#include <iostream>  
+#include <climits>  
+#include <unistd.h>  
 
-using namespace std;
+using namespace std;  
 
-// Función para encontrar el máximo subarreglo cruzado
-tuple<int, int, int> maxCrossingSum(const vector<int> &arr, int left, int mid, int right)
-{
-    int sum = 0;
-    int leftSum = INT_MIN;
-    int start = mid;
+// Variables globales para almacenar el resultado final  
+int maxSum = INT_MIN;  
+int startIdx = -1;  
+int endIdx = -1;  
 
-    // Sumar desde el medio hacia la izquierda
-    for (int i = mid; i >= left; i--)
-    {
-        sum += arr[i];
-        if (sum > leftSum)
-        {
-            leftSum = sum;
-            start = i; // Actualiza el inicio del subarreglo
-        }
-    }
+void maxCrossingSum(int arr[], int left, int mid, int right) {  
+    int sum = 0;  
+    int leftSum = INT_MIN;  
+    int start = mid;  
 
-    sum = 0;
-    int rightSum = INT_MIN;
-    int end = mid + 1;
+    // Sumar desde el medio hacia la izquierda  
+    for (int i = mid; i >= left; i--) {  
+        sum += arr[i];  
+        if (sum > leftSum) {  
+            leftSum = sum;  
+            start = i; // Actualiza el inicio del subarreglo  
+        }  
+    }  
 
-    // Sumar desde el medio hacia la derecha
-    for (int i = mid + 1; i <= right; i++)
-    {
-        sum += arr[i];
-        if (sum > rightSum)
-        {
-            rightSum = sum;
-            end = i; // Actualiza el final del subarreglo
-        }
-    }
+    sum = 0;  
+    int rightSum = INT_MIN;  
+    int end = mid + 1;  
 
-    return make_tuple(leftSum + rightSum, start, end);
-}
+    // Sumar desde el medio hacia la derecha  
+    for (int i = mid + 1; i <= right; i++) {  
+        sum += arr[i];  
+        if (sum > rightSum) {  
+            rightSum = sum;  
+            end = i; // Actualiza el final del subarreglo  
+        }  
+    }  
 
-tuple<int, int, int> maxSubArraySum(const vector<int> &arr, int left, int right)
-{
-    if (left == right)
-    {
-        return make_tuple(arr[left], left, right);
-    }
+    // Actualiza el MaxSum si es mayor que el anterior  
+    if (leftSum + rightSum > maxSum) {  
+        maxSum = leftSum + rightSum;  
+        startIdx = start; // Actualiza inicio  
+        endIdx = end;     // Actualiza fin  
+    }  
+}  
 
-    int mid = (left + right) / 2;
+void maxSubArraySum(int arr[], int left, int right) {  
+    if (left == right) {  
+        // Si somos un solo elemento  
+        if (arr[left] > maxSum) {  
+            maxSum = arr[left];  
+            startIdx = left;  
+            endIdx = left;  
+        }  
+        return;  
+    }  
 
-    auto [leftMax, leftStart, leftEnd] = maxSubArraySum(arr, left, mid);
-    auto [rightMax, rightStart, rightEnd] = maxSubArraySum(arr, mid + 1, right);
-    auto [crossMax, crossStart, crossEnd] = maxCrossingSum(arr, left, mid, right);
+    int mid = (left + right) / 2;  
 
-    if (leftMax >= rightMax && leftMax >= crossMax)
-    {
-        return make_tuple(leftMax, leftStart, leftEnd);
-    }
-    else if (rightMax >= leftMax && rightMax >= crossMax)
-    {
-        return make_tuple(rightMax, rightStart, rightEnd);
-    }
-    else
-    {
-        return make_tuple(crossMax, crossStart, crossEnd);
-    }
-}
+    // Llama recursivamente para la mitad izquierda y derecha  
+    maxSubArraySum(arr, left, mid);  
+    maxSubArraySum(arr, mid + 1, right);  
 
-int main()
-{
-    vector<int> arr = {3, 4, 6, 2 - 4 - 6 - 7, 1, 2, 4, 5, 7, 1};
-    int n = arr.size();
-    auto [maxSum, start, end] = maxSubArraySum(arr, 0, n - 1);
-    cout << "El máximo subarreglo tiene una suma de: " << maxSum
-         << " desde el índice " << start << " hasta el índice " << end << endl;
-    return 0;
+    // Encuentra la suma cruzada  
+    maxCrossingSum(arr, left, mid, right);  
+}  
+
+int main() {  
+    // Define un arreglo simple  
+    int arr[] = {3, 4, 6, -2, -4, -6, -7, 1, 2, 4, 5, 7, 1};  
+    int n = sizeof(arr) / sizeof(arr[0]);  
+
+    cout << "Array size: " << n << endl;  
+    maxSubArraySum(arr, 0, n - 1);  
+    cout << "El máximo subarreglo tiene una suma de: " << maxSum  
+         << " desde el índice " << startIdx << " hasta el índice " << endIdx << endl;  
+
+    return 0;  
 }
